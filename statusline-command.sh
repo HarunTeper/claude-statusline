@@ -25,7 +25,8 @@ branch=$(GIT_OPTIONAL_LOCKS=0 git -C "$(echo "$input" | jq -r '.workspace.curren
 
 # ── make_bar PCT LABEL ─────────────────────────────────────────────────────────
 make_bar() {
-  local pct_int="${1:-0}"
+  local pct_int
+  pct_int=$(printf '%.0f' "${1:-0}")
   local label="$2"
 
   local filled=$(( pct_int / 10 ))
