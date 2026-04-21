@@ -12,6 +12,14 @@ RESET='\033[0m'
 
 # ── Parse JSON input ───────────────────────────────────────────────────────────
 model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
+effort=$(echo "$input" | jq -r '.model.reasoning_effort // empty')
+if [ -z "$effort" ]; then
+  settings_model=$(jq -r '.model // empty' "${HOME}/.claude/settings.json" 2>/dev/null)
+  case "$settings_model" in
+    *plan*)  effort="plan" ;;
+    *fast*)  effort="fast" ;;
+  esac
+fi
 ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 five_hour_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
@@ -72,7 +80,9 @@ else
 fi
 
 # ── Assemble output ────────────────────────────────────────────────────────────
-out="${CYAN}${model}${RESET}"
+model_str="${model}"
+[ -n "$effort" ] && model_str="${model} (${effort})"
+out="${CYAN}${model_str}${RESET}"
 [ -n "$branch" ] && out="${out}  ${GREEN}${branch}${RESET}"
 out="${out}  ${MAGENTA}${ctx_str}${RESET}"
 
