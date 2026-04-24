@@ -55,28 +55,36 @@ make_bar() {
   printf '%b' "${COLOR}${label}:[${bar}] ${pct_int}%${RESET}"
 }
 
-# ── format_resets_in UNIX_TIMESTAMP ───────────────────────────────────────────
-format_resets_in() {
+# ── format_resets_at UNIX_TIMESTAMP ───────────────────────────────────────────
+format_resets_at() {
   local resets_at="$1"
   local now
   now=$(date +%s)
   local diff=$(( resets_at - now ))
-  [ "$diff" -le 0 ] && echo "now" && return
+  local time_str
+  time_str=$(date -d "@${resets_at}" '+%H:%M' 2>/dev/null || date -r "${resets_at}" '+%H:%M' 2>/dev/null)
+  if [ "$diff" -le 0 ]; then
+    printf '%s (now)' "$time_str"
+    return
+  fi
   local h=$(( diff / 3600 ))
   local m=$(( (diff % 3600) / 60 ))
+  local countdown
   if [ "$h" -gt 0 ]; then
-    printf '%dh%02dm' "$h" "$m"
+    countdown=$(printf '%dh%02dm' "$h" "$m")
   else
-    printf '%dm' "$m"
+    countdown=$(printf '%dm' "$m")
   fi
+  printf '%s (%s)' "$time_str" "$countdown"
 }
 
 # ── Context usage ──────────────────────────────────────────────────────────────
-ctx_k=$(echo "$ctx_size" | awk '{printf "%dk", $1/1000}')
+ctx_total_k=$(echo "$ctx_size" | awk '{printf "%dk", $1/1000}')
 if [ -n "$used_pct" ]; then
-  ctx_str=$(printf "ctx:%.0f%%" "$used_pct")
+  used_k=$(awk "BEGIN{printf \"%dk\", ($ctx_size * $used_pct / 100) / 1000}")
+  ctx_str=$(awk "BEGIN{printf \"ctx:%.0f%% (%s/%s)\", $used_pct, \"$used_k\", \"$ctx_total_k\"}")
 else
-  ctx_str="ctx:${ctx_k}"
+  ctx_str="ctx:${ctx_total_k}"
 fi
 
 # ── Assemble output ────────────────────────────────────────────────────────────
@@ -90,11 +98,11 @@ out="${out}  ${MAGENTA}${ctx_str}${RESET}"
 
 if [ -n "$five_hour_pct" ]; then
   out="${out}  $(make_bar "$five_hour_pct" "5h")"
-  [ -n "$five_hour_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_in "$five_hour_resets")${RESET}"
+  [ -n "$five_hour_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_at "$five_hour_resets")${RESET}"
 fi
 if [ -n "$seven_day_pct" ]; then
   out="${out}  $(make_bar "$seven_day_pct" "7d")"
-  [ -n "$seven_day_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_in "$seven_day_resets")${RESET}"
+  [ -n "$seven_day_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_at "$seven_day_resets")${RESET}"
 fi
 
 printf '%b' "$out"
