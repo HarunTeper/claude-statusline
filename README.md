@@ -4,6 +4,8 @@ A statusline script for [Claude Code](https://claude.ai/code) that displays mode
 
 ## What it shows
 
+![statusline screenshot](screenshot.png)
+
 ```
 Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░░░] 13%  ↺ 14:32 (3h26m)  7d:[██░░░░░░░░] 20%  ↺ 22:14 (80h26m)
 ```
@@ -24,6 +26,14 @@ Colors go green → yellow → red as usage crosses 50% and 80%.
 - `awk` (standard on all platforms)
 
 ## Installation
+
+**One-liner:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/HarunTeper/claude-statusline/main/install.sh)
+```
+
+**Manual:**
 
 1. Copy `statusline-command.sh` to `~/.claude/statusline-command.sh`
 2. Add to `~/.claude/settings.json`:
