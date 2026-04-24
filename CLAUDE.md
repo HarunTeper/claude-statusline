@@ -34,11 +34,19 @@ The script is entirely self-contained in `statusline-command.sh`:
 
 ## Keeping docs in sync
 
-When changing the script's output format or adding new fields, update `README.md` — specifically the example output line and the bullet descriptions under "What it shows".
+When changing the script's output format or adding new fields, update `README.md` — specifically the example output line, the bullet descriptions under "What it shows", and regenerate `screenshot.png` (see below).
+
+## Regenerating screenshot.png
+
+`screenshot.png` is a terminal-style PNG rendered with Python/Pillow. To update it after changing the output format, run the inline Python script that was used to generate it originally (renders fixed segments with ANSI colors onto a dark background using DejaVuSansMono). The image is embedded in `README.md` and committed to the repo so it renders on GitHub.
+
+## install.sh
+
+`install.sh` copies `statusline-command.sh` to `~/.claude/` and patches `~/.claude/settings.json` using `jq`. When adding new configuration fields to the statusline, update `install.sh` if any settings need to change as part of installation.
 
 ## Installation (for reference)
 
-Copy the script to `~/.claude/statusline-command.sh` and add to `~/.claude/settings.json`:
+Run `install.sh` or copy the script to `~/.claude/statusline-command.sh` and add to `~/.claude/settings.json`:
 
 ```json
 {
