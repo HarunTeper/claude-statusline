@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+VERSION="v1.1"
 input=$(cat)
 
 # ── ANSI color codes ───────────────────────────────────────────────────────────
@@ -55,9 +56,10 @@ make_bar() {
   printf '%b' "${COLOR}${label}:[${bar}] ${pct_int}%${RESET}"
 }
 
-# ── format_resets_at UNIX_TIMESTAMP ───────────────────────────────────────────
+# ── format_resets_at UNIX_TIMESTAMP [show_day] ────────────────────────────────
 format_resets_at() {
   local resets_at="$1"
+  local show_day="${2:-}"
   local now
   now=$(date +%s)
   local diff=$(( resets_at - now ))
@@ -75,7 +77,13 @@ format_resets_at() {
   else
     countdown=$(printf '%dm' "$m")
   fi
-  printf '%s (%s)' "$time_str" "$countdown"
+  if [ -n "$show_day" ] && [ "$diff" -gt 72000 ]; then
+    local day_str
+    day_str=$(date -d "@${resets_at}" '+%a' 2>/dev/null || date -r "${resets_at}" '+%a' 2>/dev/null)
+    printf '%s %s (%s)' "$day_str" "$time_str" "$countdown"
+  else
+    printf '%s (%s)' "$time_str" "$countdown"
+  fi
 }
 
 # ── Context usage ──────────────────────────────────────────────────────────────
@@ -102,7 +110,28 @@ if [ -n "$five_hour_pct" ]; then
 fi
 if [ -n "$seven_day_pct" ]; then
   out="${out}  $(make_bar "$seven_day_pct" "7d")"
-  [ -n "$seven_day_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_at "$seven_day_resets")${RESET}"
+  [ -n "$seven_day_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_at "$seven_day_resets" show_day)${RESET}"
+fi
+
+# ── Update check (cached 1h in /tmp) ──────────────────────────────────────────
+_update_cache="/tmp/.claude-statusline-update-check"
+_cache_ttl=3600
+_now=$(date +%s)
+_check_update=1
+if [ -f "$_update_cache" ]; then
+  _cache_age=$(( _now - $(date -r "$_update_cache" +%s 2>/dev/null || echo 0) ))
+  [ "$_cache_age" -lt "$_cache_ttl" ] && _check_update=0
+fi
+if [ "$_check_update" -eq 1 ]; then
+  _latest=$(curl -fsSL --max-time 3 \
+    "https://api.github.com/repos/HarunTeper/claude-statusline/releases/latest" \
+    2>/dev/null | jq -r '.tag_name // empty')
+  printf '%s' "$_latest" > "$_update_cache"
+else
+  _latest=$(cat "$_update_cache" 2>/dev/null)
+fi
+if [ -n "$_latest" ] && [ "$_latest" != "$VERSION" ]; then
+  out="${out}  ${YELLOW}⬆ update available: ${_latest}${RESET}"
 fi
 
 printf '%b' "$out"
