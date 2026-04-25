@@ -7,7 +7,7 @@ A statusline script for [Claude Code](https://claude.ai/code) that displays mode
 ![statusline screenshot](screenshot.png)
 
 ```
-Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░░░] 13%  ↺ 14:32 (3h26m)  7d:[██░░░░░░░░] 20%  ↺ 22:14 (80h26m)
+Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░░░] 13%  ↺ 14:32 (3h26m)  7d:[██░░░░░░░░] 20%  ↺ Tue 22:14 (80h26m)
 ```
 
 - **Model** — display name of the active model, with effort/mode in parentheses when applicable (e.g. `plan`, `fast`)
@@ -15,7 +15,8 @@ Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░
 - **ctx%** — context window usage percentage and token count (`used/total`)
 - **$X.XX** — session cost so far
 - **5h bar** — 5-hour rolling rate limit usage with reset time and countdown
-- **7d bar** — 7-day rolling rate limit usage with reset time and countdown
+- **7d bar** — 7-day rolling rate limit usage with reset time, day-of-week, and countdown
+- **⬆ update available** — shown in yellow when a newer GitHub release exists (checked hourly)
 
 Colors go green → yellow → red as usage crosses 50% and 80%.
 
@@ -24,6 +25,7 @@ Colors go green → yellow → red as usage crosses 50% and 80%.
 - `jq` — `sudo apt-get install jq` / `brew install jq`
 - `git`
 - `awk` (standard on all platforms)
+- `curl` (standard on all platforms, used for update checks)
 
 ## Installation
 
