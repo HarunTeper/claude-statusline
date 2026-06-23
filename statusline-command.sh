@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-VERSION="v1.1"
+VERSION="v1.2"
 input=$(cat)
 
 # ── ANSI color codes ───────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ else
   _latest=$(cat "$_update_cache" 2>/dev/null)
 fi
 if [ -n "$_latest" ] && [ "$_latest" != "$VERSION" ]; then
-  out="${out}  ${YELLOW}⬆ update available: ${_latest}${RESET}"
+  out="${out}  ${YELLOW}⬆ ${_latest} — git pull && bash install.sh${RESET}"
 fi
 
 printf '%b' "$out"
