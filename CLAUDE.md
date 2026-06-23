@@ -29,7 +29,7 @@ The script is entirely self-contained in `statusline-command.sh`:
 3. **Effort/mode fallback** — if `reasoning_effort` is absent in the JSON, reads `~/.claude/settings.json` to detect `plan`/`fast` model suffixes
 4. **Git branch** — runs `git rev-parse` against `workspace.current_dir` using `GIT_OPTIONAL_LOCKS=0` to avoid lock contention
 5. **`make_bar PCT LABEL`** — renders a 10-cell block/░ bar with green/yellow/red coloring at 50%/80% thresholds
-6. **`format_resets_at UNIX_TIMESTAMP`** — formats a reset time as `HH:MM (NhNNm)` countdown, cross-platform (GNU `date -d` with BSD `date -r` fallback)
+6. **`format_resets_at UNIX_TIMESTAMP`** — formats a reset time as `HH:MM (NhNNm)` countdown; when the reset is a day or more away (e.g. the 7-day limit) it prefixes the weekday and uses a `NdNh` countdown (e.g. `Sat 22:14 (3d8h)`). Weekday is forced to English via `LC_ALL=C`. Cross-platform (GNU `date -d` with BSD `date -r` fallback)
 7. **Output** — assembles ANSI-colored segments and writes with `printf '%b'`
 
 ## Keeping docs in sync

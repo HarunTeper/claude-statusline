@@ -56,34 +56,35 @@ make_bar() {
   printf '%b' "${COLOR}${label}:[${bar}] ${pct_int}%${RESET}"
 }
 
-# ── format_resets_at UNIX_TIMESTAMP [show_day] ────────────────────────────────
+# ── format_resets_at UNIX_TIMESTAMP ───────────────────────────────────────────
 format_resets_at() {
   local resets_at="$1"
-  local show_day="${2:-}"
   local now
   now=$(date +%s)
   local diff=$(( resets_at - now ))
+  # When the reset is a day or more away (e.g. the 7-day limit), prefix the
+  # weekday so it isn't ambiguous; otherwise just show HH:MM. LC_ALL=C keeps
+  # the weekday in English regardless of the system locale.
+  local time_fmt='+%H:%M'
+  [ "$diff" -ge 86400 ] && time_fmt='+%a %H:%M'
   local time_str
-  time_str=$(date -d "@${resets_at}" '+%H:%M' 2>/dev/null || date -r "${resets_at}" '+%H:%M' 2>/dev/null)
+  time_str=$(LC_ALL=C date -d "@${resets_at}" "$time_fmt" 2>/dev/null || LC_ALL=C date -r "${resets_at}" "$time_fmt" 2>/dev/null)
   if [ "$diff" -le 0 ]; then
     printf '%s (now)' "$time_str"
     return
   fi
-  local h=$(( diff / 3600 ))
+  local d=$(( diff / 86400 ))
+  local h=$(( (diff % 86400) / 3600 ))
   local m=$(( (diff % 3600) / 60 ))
   local countdown
-  if [ "$h" -gt 0 ]; then
+  if [ "$d" -gt 0 ]; then
+    countdown=$(printf '%dd%dh' "$d" "$h")
+  elif [ "$h" -gt 0 ]; then
     countdown=$(printf '%dh%02dm' "$h" "$m")
   else
     countdown=$(printf '%dm' "$m")
   fi
-  if [ -n "$show_day" ] && [ "$diff" -gt 72000 ]; then
-    local day_str
-    day_str=$(date -d "@${resets_at}" '+%a' 2>/dev/null || date -r "${resets_at}" '+%a' 2>/dev/null)
-    printf '%s %s (%s)' "$day_str" "$time_str" "$countdown"
-  else
-    printf '%s (%s)' "$time_str" "$countdown"
-  fi
+  printf '%s (%s)' "$time_str" "$countdown"
 }
 
 # ── Context usage ──────────────────────────────────────────────────────────────
@@ -110,12 +111,12 @@ if [ -n "$five_hour_pct" ]; then
 fi
 if [ -n "$seven_day_pct" ]; then
   out="${out}  $(make_bar "$seven_day_pct" "7d")"
-  [ -n "$seven_day_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_at "$seven_day_resets" show_day)${RESET}"
+  [ -n "$seven_day_resets" ] && out="${out}  ${YELLOW}↺ $(format_resets_at "$seven_day_resets")${RESET}"
 fi
 
-# ── Update check (cached 1h in /tmp) ──────────────────────────────────────────
+# ── Update check (cached 24h in /tmp) ─────────────────────────────────────────
 _update_cache="/tmp/.claude-statusline-update-check"
-_cache_ttl=3600
+_cache_ttl=86400
 _now=$(date +%s)
 _check_update=1
 if [ -f "$_update_cache" ]; then

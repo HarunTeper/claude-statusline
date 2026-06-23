@@ -7,7 +7,7 @@ A statusline script for [Claude Code](https://claude.ai/code) that displays mode
 ![statusline screenshot](screenshot.png)
 
 ```
-Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░░░] 13%  ↺ 14:32 (3h26m)  7d:[██░░░░░░░░] 20%  ↺ Tue 22:14 (80h26m)
+Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░░░] 13%  ↺ 14:32 (3h26m)  7d:[██░░░░░░░░] 20%  ↺ Sat 22:14 (3d8h)
 ```
 
 - **Model** — display name of the active model, with effort/mode in parentheses when applicable (e.g. `plan`, `fast`)
