@@ -16,7 +16,7 @@ Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░
 - **$X.XX** — session cost so far
 - **5h bar** — 5-hour rolling rate limit usage with reset time and countdown
 - **7d bar** — 7-day rolling rate limit usage with reset time, day-of-week, and countdown
-- **⬆ update available** — shown in yellow when a newer GitHub release exists (checked hourly)
+- **⬆ update** — shown in yellow when a newer GitHub release exists, with the command to update (checked once per day)
 
 Colors go green → yellow → red as usage crosses 50% and 80%.
 
@@ -50,3 +50,13 @@ bash <(curl -fsSL https://raw.githubusercontent.com/HarunTeper/claude-statusline
 ```
 
 That's it — Claude Code picks it up immediately.
+
+## Updating
+
+When the status line shows `⬆ <version> — git pull && bash install.sh`, a newer release is available. From your local clone:
+
+```bash
+git pull && bash install.sh
+```
+
+This re-copies the latest `statusline-command.sh` to `~/.claude/`. Claude Code picks up the new version on the next render.
