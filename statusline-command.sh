@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-VERSION="v1.2"
+VERSION="v1.3"
 input=$(cat)
 
 # ── ANSI color codes ───────────────────────────────────────────────────────────
@@ -15,11 +15,16 @@ RESET='\033[0m'
 model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
 effort=$(echo "$input" | jq -r '.model.reasoning_effort // empty')
 if [ -z "$effort" ]; then
-  settings_model=$(jq -r '.model // empty' "${HOME}/.claude/settings.json" 2>/dev/null)
-  case "$settings_model" in
-    *plan*)  effort="plan" ;;
-    *fast*)  effort="fast" ;;
-  esac
+  # The live JSON omits reasoning_effort, so fall back to settings.json. Prefer
+  # the explicit effortLevel field; otherwise infer plan/fast from a model suffix.
+  effort=$(jq -r '.effortLevel // empty' "${HOME}/.claude/settings.json" 2>/dev/null)
+  if [ -z "$effort" ]; then
+    settings_model=$(jq -r '.model // empty' "${HOME}/.claude/settings.json" 2>/dev/null)
+    case "$settings_model" in
+      *plan*)  effort="plan" ;;
+      *fast*)  effort="fast" ;;
+    esac
+  fi
 fi
 ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
@@ -98,7 +103,7 @@ fi
 
 # ── Assemble output ────────────────────────────────────────────────────────────
 model_str="${model}"
-[ -n "$effort" ] && model_str="${model} (${effort})"
+[ -n "$effort" ] && model_str="${model} [${effort}]"
 out="${CYAN}${model_str}${RESET}"
 [ -n "$branch" ] && out="${out}  ${GREEN}${branch}${RESET}"
 out="${out}  ${MAGENTA}${ctx_str}${RESET}"
@@ -131,8 +136,15 @@ if [ "$_check_update" -eq 1 ]; then
 else
   _latest=$(cat "$_update_cache" 2>/dev/null)
 fi
+# Only nag when the published release is strictly newer than the local
+# VERSION. Comparing with != would also fire when a local dev copy is *ahead*
+# of the latest release (e.g. an unreleased bump). sort -V orders the two tags;
+# if _latest sorts last and differs, it is the newer one.
 if [ -n "$_latest" ] && [ "$_latest" != "$VERSION" ]; then
-  out="${out}  ${YELLOW}⬆ ${_latest} — git pull && bash install.sh${RESET}"
+  _newest=$(printf '%s\n%s\n' "$VERSION" "$_latest" | sort -V | tail -n1)
+  if [ "$_newest" = "$_latest" ]; then
+    out="${out}  ${YELLOW}⬆ ${_latest} — git pull && bash install.sh${RESET}"
+  fi
 fi
 
 printf '%b' "$out"

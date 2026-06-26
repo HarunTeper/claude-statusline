@@ -7,10 +7,10 @@ A statusline script for [Claude Code](https://claude.ai/code) that displays mode
 ![statusline screenshot](screenshot.png)
 
 ```
-Sonnet 4.6 (plan)  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░░░] 13%  ↺ 14:32 (3h26m)  7d:[██░░░░░░░░] 20%  ↺ Sat 22:14 (3d8h)
+Sonnet 4.6 [plan]  main  ctx:19% (38k/200k)  $0.88  5h:[█░░░░░░░░░] 13%  ↺ 14:32 (3h26m)  7d:[██░░░░░░░░] 20%  ↺ Sat 22:14 (3d8h)
 ```
 
-- **Model** — display name of the active model, with effort/mode in parentheses when applicable (e.g. `plan`, `fast`)
+- **Model** — display name of the active model, with effort/mode shown in brackets when known (e.g. `[xhigh]`, `[plan]`, `[fast]`). Effort comes from the live session, falling back to `effortLevel` (or a `plan`/`fast` model suffix) in `~/.claude/settings.json`
 - **Git branch** — current branch of the workspace
 - **ctx%** — context window usage percentage and token count (`used/total`)
 - **$X.XX** — session cost so far
